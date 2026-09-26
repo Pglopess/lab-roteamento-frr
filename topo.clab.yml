@@ -1,0 +1,25 @@
+# Topologia física única, usada pelos três protocolos.
+# As configs vêm de running/, preenchida por scripts/up.sh <protocolo>.
+name: rotas
+topology:
+  defaults:
+    kind: linux
+    image: quay.io/frrouting/frr:10.2.1
+  nodes:
+    r1:
+      binds: [running/r1/daemons:/etc/frr/daemons, running/r1/frr.conf:/etc/frr/frr.conf, running/vtysh.conf:/etc/frr/vtysh.conf]
+    r2:
+      binds: [running/r2/daemons:/etc/frr/daemons, running/r2/frr.conf:/etc/frr/frr.conf, running/vtysh.conf:/etc/frr/vtysh.conf]
+    r3:
+      binds: [running/r3/daemons:/etc/frr/daemons, running/r3/frr.conf:/etc/frr/frr.conf, running/vtysh.conf:/etc/frr/vtysh.conf]
+    r4:
+      binds: [running/r4/daemons:/etc/frr/daemons, running/r4/frr.conf:/etc/frr/frr.conf, running/vtysh.conf:/etc/frr/vtysh.conf]
+    r5:
+      binds: [running/r5/daemons:/etc/frr/daemons, running/r5/frr.conf:/etc/frr/frr.conf, running/vtysh.conf:/etc/frr/vtysh.conf]
+  links:
+    - endpoints: ["r1:eth1", "r2:eth1"]   # 10.0.12.0/30  AS65001 interno
+    - endpoints: ["r1:eth2", "r3:eth1"]   # 10.0.13.0/30  AS65001-AS65002
+    - endpoints: ["r2:eth2", "r4:eth1"]   # 10.0.24.0/30  AS65001-AS65002 (corda)
+    - endpoints: ["r2:eth3", "r5:eth1"]   # 10.0.25.0/30  AS65001-AS65003
+    - endpoints: ["r3:eth2", "r4:eth2"]   # 10.0.34.0/30  AS65002 interno
+    - endpoints: ["r4:eth3", "r5:eth2"]   # 10.0.45.0/30  AS65002-AS65003
