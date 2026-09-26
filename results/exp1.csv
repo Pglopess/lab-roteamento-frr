@@ -1,0 +1,2 @@
+proto,mode,rep,lost_probes,interruption_s,recovered
+ospf,down,1,0,0,yes
