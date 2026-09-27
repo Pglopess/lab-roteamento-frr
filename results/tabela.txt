@@ -2,142 +2,142 @@
 --- r1
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-ospf                 11                   8                    
+connected            5                    5                    
+local                5                    5                    
+ospf                 16                   12                   
 ------
-Totals               20                   17                   
+Totals               27                   23                   
 
 --- r2
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            5                    5                    
-local                5                    5                    
-ospf                 11                   7                    
+connected            6                    6                    
+local                6                    6                    
+ospf                 16                   11                   
 ------
-Totals               22                   18                   
+Totals               29                   24                   
 
 --- r3
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-ospf                 11                   8                    
+connected            5                    5                    
+local                5                    5                    
+ospf                 16                   12                   
 ------
-Totals               20                   17                   
+Totals               27                   23                   
 
 --- r4
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            5                    5                    
-local                5                    5                    
-ospf                 11                   7                    
+connected            6                    6                    
+local                6                    6                    
+ospf                 16                   11                   
 ------
-Totals               22                   18                   
+Totals               29                   24                   
 
 --- r5
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-ospf                 11                   8                    
+connected            5                    5                    
+local                5                    5                    
+ospf                 16                   12                   
 ------
-Totals               20                   17                   
+Totals               27                   23                   
 
 ===== rip
 --- r1
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-rip                  8                    8                    
+connected            5                    5                    
+local                5                    5                    
+rip                  12                   12                   
 ------
-Totals               17                   17                   
+Totals               23                   23                   
 
 --- r2
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            5                    5                    
-local                5                    5                    
-rip                  7                    7                    
+connected            6                    6                    
+local                6                    6                    
+rip                  11                   11                   
 ------
-Totals               18                   18                   
+Totals               24                   24                   
 
 --- r3
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-rip                  8                    8                    
+connected            5                    5                    
+local                5                    5                    
+rip                  12                   12                   
 ------
-Totals               17                   17                   
+Totals               23                   23                   
 
 --- r4
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            5                    5                    
-local                5                    5                    
-rip                  7                    7                    
+connected            6                    6                    
+local                6                    6                    
+rip                  11                   11                   
 ------
-Totals               18                   18                   
+Totals               24                   24                   
 
 --- r5
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-rip                  8                    8                    
+connected            5                    5                    
+local                5                    5                    
+rip                  12                   12                   
 ------
-Totals               17                   17                   
+Totals               23                   23                   
 
 ===== bgp
 --- r1
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-ebgp                 2                    2                    
-ibgp                 2                    2                    
+connected            5                    5                    
+local                5                    5                    
+ebgp                 4                    4                    
+ibgp                 4                    4                    
 ------
-Totals               13                   13                   
+Totals               19                   19                   
 
 --- r2
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            5                    5                    
-local                5                    5                    
-ebgp                 3                    3                    
-ibgp                 1                    1                    
+connected            6                    6                    
+local                6                    6                    
+ebgp                 6                    6                    
+ibgp                 2                    2                    
 ------
-Totals               15                   15                   
+Totals               21                   21                   
 
 --- r3
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-ebgp                 2                    2                    
-ibgp                 2                    2                    
+connected            5                    5                    
+local                5                    5                    
+ebgp                 4                    4                    
+ibgp                 4                    4                    
 ------
-Totals               13                   13                   
+Totals               19                   19                   
 
 --- r4
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            5                    5                    
-local                5                    5                    
-ebgp                 3                    3                    
-ibgp                 1                    1                    
+connected            6                    6                    
+local                6                    6                    
+ebgp                 6                    6                    
+ibgp                 2                    2                    
 ------
-Totals               15                   15                   
+Totals               21                   21                   
 
 --- r5
 Route Source         Routes               FIB  (vrf default)
 kernel               1                    1                    
-connected            4                    4                    
-local                4                    4                    
-ebgp                 4                    4                    
+connected            5                    5                    
+local                5                    5                    
+ebgp                 8                    8                    
 ibgp                 0                    0                    
 ------
-Totals               13                   13                   
+Totals               19                   19                   
 
