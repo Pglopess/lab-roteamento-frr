@@ -2,7 +2,7 @@
 
 Trabalho 1 de Redes de Computadores (UNISINOS). Trabalho individual.
 
-Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, construído com FRRouting em containers (containerlab). Três protocolos (BGP, OSPF, RIP) são configurados sobre a mesma topologia física, um por vez, e comparados em convergência, tráfego de controle, seleção de rotas, tamanho da tabela e complexidade de configuração.
+Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua rede de acesso e um host, construído com FRRouting em containers (containerlab). Três protocolos (BGP, OSPF, RIP) são configurados sobre a mesma topologia física, um por vez, e comparados em convergência, tráfego de controle, seleção de rotas, tamanho da tabela e complexidade de configuração.
 
 **Vídeo de demonstração:** PREENCHER (link do Release ou do arquivo no repositório)
 
@@ -28,6 +28,7 @@ Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, construído com
 
 ```
 docker pull quay.io/frrouting/frr:10.2.1
+docker pull alpine:3.20        # hosts das redes de acesso
 ```
 
 Escolha da plataforma: o FRRouting é mantido ativamente e suporta os três protocolos. Os exemplos do enunciado (XORP, BIRD, Quagga) foram evitados por orientação do professor, por serem tecnologias antigas.
@@ -35,7 +36,7 @@ Escolha da plataforma: o FRRouting é mantido ativamente e suporta os três prot
 ## Topologia
 
 ### Topologia física
-5 roteadores, 3 ASes, 6 links. Cada roteador tem um loopback `10.255.0.N/32`, usado como router-id, prefixo anunciado e origem/destino dos testes.
+5 roteadores, 3 ASes, 6 links entre roteadores e 5 redes de acesso. Cada roteador tem um loopback `10.255.0.N/32` (router-id) e uma rede de acesso `192.168.N.0/24` com um host `hN` (`192.168.N.10`, gateway `192.168.N.1`).
 
 ```mermaid
 graph TB
@@ -56,6 +57,11 @@ graph TB
   R2 ---|"10.0.25.0/30"| R5
   R3 ---|"10.0.34.0/30"| R4
   R4 ---|"10.0.45.0/30"| R5
+  H1["h1<br/>192.168.1.10"] --- R1
+  H2["h2<br/>192.168.2.10"] --- R2
+  H3["h3<br/>192.168.3.10"] --- R3
+  H4["h4<br/>192.168.4.10"] --- R4
+  H5["h5<br/>192.168.5.10"] --- R5
 ```
 
 | Link | Rede | Interfaces | Tipo (no BGP) |
@@ -66,6 +72,18 @@ graph TB
 | R2-R5 | 10.0.25.0/30 | R2:eth3 / R5:eth1 | eBGP |
 | R3-R4 | 10.0.34.0/30 | R3:eth2 / R4:eth2 | iBGP (AS65002) |
 | R4-R5 | 10.0.45.0/30 | R4:eth3 / R5:eth2 | eBGP |
+
+Redes de acesso (hosts `alpine:3.20`, configurados pelo `exec` do `topo.clab.yml`):
+
+| Rede de acesso | Roteador (gateway) | Host |
+|---|---|---|
+| 192.168.1.0/24 | R1:eth3 (.1) | h1:eth1 (.10) |
+| 192.168.2.0/24 | R2:eth4 (.1) | h2:eth1 (.10) |
+| 192.168.3.0/24 | R3:eth3 (.1) | h3:eth1 (.10) |
+| 192.168.4.0/24 | R4:eth4 (.1) | h4:eth1 (.10) |
+| 192.168.5.0/24 | R5:eth3 (.1) | h5:eth1 (.10) |
+
+As interfaces de acesso são **passivas** em OSPF (`ip ospf passive`) e RIP (`passive-interface`): o prefixo é anunciado, mas nenhum pacote do protocolo é enviado ao host.
 
 Regra de endereçamento: o roteador de número menor fica com `.1` e o maior com `.2`. A interface `eth0` de cada container é a rede de gerência do containerlab e não participa do roteamento.
 
@@ -97,9 +115,9 @@ graph LR
 
 | Protocolo | Domínio | Detalhe |
 |---|---|---|
-| OSPF | domínio único, área 0 | rede `point-to-point`, custo 10 por link |
-| RIP | domínio único, v2 | métrica = saltos, `network 10.0.0.0/16` e `10.255.0.0/24` |
-| BGP | AS65001 (R1,R2), AS65002 (R3,R4), AS65003 (R5) | iBGP pelo link direto com `next-hop-self`, sem IGP; anuncia só os loopbacks |
+| OSPF | domínio único, área 0 | rede `point-to-point`, custo 10 por link; LAN passiva |
+| RIP | domínio único, v2 | métrica = saltos, `network 10.0.0.0/16`, `10.255.0.0/24` e a LAN; LAN passiva |
+| BGP | AS65001 (R1,R2), AS65002 (R3,R4), AS65003 (R5) | iBGP pelo link direto com `next-hop-self`, sem IGP; anuncia loopbacks e redes de acesso |
 
 Versão em texto:
 ```
@@ -116,12 +134,14 @@ Versão em texto:
    +--------| R5 |------+
             +----+
             AS65003
+
+ Cada Rn tem ainda a LAN 192.168.n.0/24 com o host hn (.10).
 ```
 
 ## Como reproduzir
 ```
 ./scripts/up.sh ospf|rip|bgp                 # sobe a topologia com o protocolo escolhido
-./scripts/check.sh ospf|rip|bgp              # vizinhos + matriz de ping entre loopbacks
+./scripts/check.sh ospf|rip|bgp              # vizinhos + matriz de ping entre loopbacks e entre hosts
 ./scripts/down.sh                            # destrói o laboratório
 ./scripts/demo.sh ospf|rip|bgp               # demonstração passo a passo (usada no vídeo)
 ./scripts/exp1.sh <proto> down|silent <rep>  # experimento 1: convergência
@@ -151,7 +171,8 @@ O `up.sh` copia `configs/<proto>` para `running/` e sobe o laboratório. Só uma
 - **Timers padrão do FRR:** OSPF hello 10 s / dead 40 s; RIP update 30 s / timeout 180 s; BGP keepalive 60 s / hold 180 s.
 - **Custos:** OSPF fixado em 10 por link; RIP usa contagem de saltos.
 - **Falhas no BGP** só em links entre ASes (R2-R5): sem IGP, a queda de um link iBGP particiona o AS.
-- **BGP anuncia só os loopbacks:** não anuncia as redes dos links `/30`. Isso reduz a tabela do BGP em relação a OSPF e RIP e é consequência desta configuração.
+- **BGP anuncia loopbacks e redes de acesso:** não anuncia as redes dos links `/30`, que só servem ao transporte entre roteadores. Isso reduz a tabela do BGP em relação a OSPF e RIP e é consequência desta configuração.
+- **Redes de acesso passivas:** em OSPF e RIP as LANs dos hosts são anunciadas, mas não formam vizinhança.
 - **Multipath:** nos empates da corda, o OSPF instalou os dois caminhos e o RIP do FRR instalou um só.
 
 ## Experimento 1: convergência
@@ -212,6 +233,8 @@ Limitação: os tempos de mudança medidos pelo script (OSPF 0,1 s, BGP 0,7 s) e
 ## Tamanho da tabela de roteamento
 `show ip route summary` em regime estável, contando as rotas aprendidas pelo protocolo na FIB. Dados brutos em `results/tabela.txt`.
 
+> **PREENCHER:** valores abaixo medidos antes das redes de acesso. Rodar `./scripts/tabela.sh` e `python3 scripts/graficos.py` e atualizar. Esperado: OSPF e RIP 12/11/12/11/12, BGP 8 em todos.
+
 | Protocolo | R1 | R2 | R3 | R4 | R5 |
 |---|---|---|---|---|---|
 | OSPF | 8 | 7 | 8 | 7 | 8 |
@@ -227,9 +250,9 @@ Linhas úteis (sem vazias nem comentários `!`) dos `frr.conf` dos 5 roteadores 
 
 | Protocolo | Total | R1 | R2 |
 |---|---|---|---|
-| RIP | 86 | 16 | 19 |
-| BGP | 107 | 20 | 20 |
-| OSPF | 112 | 20 | 26 |
+| RIP | 111 | 21 | 24 |
+| BGP | 127 | 24 | 28 |
+| OSPF | 137 | 25 | 31 |
 
 ![Linhas](results/graficos/linhas.png)
 

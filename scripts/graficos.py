@@ -54,18 +54,30 @@ for col, rot, arq in [("pacotes_por_s", "Pacotes/s", "exp2_pacotes"), ("bytes_po
     salvar(arq)
 
 # ---- Tabela de roteamento ----
-fib = {"OSPF": [8, 7, 8, 7, 8], "RIP": [8, 7, 8, 7, 8], "BGP": [4, 4, 4, 4, 4]}
+# Lido de results/tabela.txt (saida do tabela.sh): coluna FIB da linha do protocolo.
+import re
+fib, atual = {}, None
+for ln in open("results/tabela.txt"):
+    m = re.match(r"===== (\w+)", ln)
+    if m: atual = m.group(1); fib[atual.upper()] = []; continue
+    if ln.startswith("--- r") and atual: fib[atual.upper()].append(0); continue
+    c = ln.split()
+    # BGP aparece separado em ebgp + ibgp; soma os dois
+    if atual and len(c) >= 3 and c[0] in (atual, "ebgp", "ibgp"): fib[atual.upper()][-1] += int(c[2])
+fib = {p: fib[p] for p in ["OSPF", "RIP", "BGP"]}
 fig, ax = plt.subplots(figsize=(7, 4))
 w = 0.25
 for j, (p, ys) in enumerate(fib.items()):
     ax.bar([k + (j - 1) * w for k in range(5)], ys, w, label=p, color=COR[p])
 ax.set_xticks(range(5)); ax.set_xticklabels([f"R{i}" for i in range(1, 6)])
-ax.set_ylabel("Rotas do protocolo na FIB"); ax.set_ylim(0, 10); ax.legend(loc="upper right", ncol=3)
+ax.set_ylabel("Rotas do protocolo na FIB"); ax.set_ylim(0, max(max(v) for v in fib.values()) + 3); ax.legend(loc="upper right", ncol=3)
 ax.set_title("Tamanho da tabela de roteamento")
 salvar("tabela")
 
 # ---- Complexidade de configuração ----
-lin = {"RIP": 86, "BGP": 107, "OSPF": 112}
+# Mesma regra do linhas.sh: linhas sem vazias e sem comentarios "!".
+lin = {p.upper(): sum(1 for r in range(1, 6) for l in open(f"configs/{p}/r{r}/frr.conf")
+                      if l.strip() and not l.strip().startswith("!")) for p in ["rip", "bgp", "ospf"]}
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.bar(list(lin), list(lin.values()), color=[COR[k] for k in lin])
 for i, y in enumerate(lin.values()): ax.text(i, y, str(y), ha="center", va="bottom")
