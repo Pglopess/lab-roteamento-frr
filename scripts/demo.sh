@@ -34,9 +34,9 @@ docker exec clab-rotas-r1 sh -c 'ping -I 10.255.0.1 10.255.0.5' > /tmp/demo_ping
 PP=$!
 sleep 3
 docker exec clab-rotas-r2 ip link set eth3 down
-echo "link r2:eth3 DOWN"; sleep 20
+echo "link r2:eth3 DOWN"; sleep 40
 kill $PP 2>/dev/null; docker exec clab-rotas-r1 pkill ping 2>/dev/null
-echo "--- ping: $(grep -c "bytes from" /tmp/demo_ping.log) respostas, ultima seq=$(grep -o "seq=[0-9]*" /tmp/demo_ping.log | tail -1), saltos de seq: $(grep -o "seq=[0-9]*" /tmp/demo_ping.log | cut -d= -f2 | awk "NR>1 && $1!=p+1{g++} {p=$1} END{print g+0}")"
+echo "--- ping durante a queda (buracos na seq = pacotes perdidos):"; grep -o "seq=[0-9]*" /tmp/demo_ping.log | cut -d= -f2 | tr "\n" " "; echo
  
 passo "7. Nova rota do R1 para o R5"
 V 1 "show ip route 10.255.0.5/32" | grep -E "Known|via"
