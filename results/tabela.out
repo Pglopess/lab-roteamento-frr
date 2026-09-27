@@ -1,0 +1,144 @@
+===== ospf
+--- r1
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+ospf                 11                   8                    
+------
+Totals               20                   17                   
+
+--- r2
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            5                    5                    
+local                5                    5                    
+ospf                 11                   7                    
+------
+Totals               22                   18                   
+
+--- r3
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+ospf                 11                   8                    
+------
+Totals               20                   17                   
+
+--- r4
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            5                    5                    
+local                5                    5                    
+ospf                 11                   7                    
+------
+Totals               22                   18                   
+
+--- r5
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+ospf                 11                   8                    
+------
+Totals               20                   17                   
+
+===== rip
+--- r1
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+rip                  8                    8                    
+------
+Totals               17                   17                   
+
+--- r2
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            5                    5                    
+local                5                    5                    
+rip                  7                    7                    
+------
+Totals               18                   18                   
+
+--- r3
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+rip                  8                    8                    
+------
+Totals               17                   17                   
+
+--- r4
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            5                    5                    
+local                5                    5                    
+rip                  7                    7                    
+------
+Totals               18                   18                   
+
+--- r5
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+rip                  8                    8                    
+------
+Totals               17                   17                   
+
+===== bgp
+--- r1
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+ebgp                 2                    2                    
+ibgp                 2                    2                    
+------
+Totals               13                   13                   
+
+--- r2
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            5                    5                    
+local                5                    5                    
+ebgp                 3                    3                    
+ibgp                 1                    1                    
+------
+Totals               15                   15                   
+
+--- r3
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+ebgp                 2                    2                    
+ibgp                 2                    2                    
+------
+Totals               13                   13                   
+
+--- r4
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            5                    5                    
+local                5                    5                    
+ebgp                 3                    3                    
+ibgp                 1                    1                    
+------
+Totals               15                   15                   
+
+--- r5
+Route Source         Routes               FIB  (vrf default)
+kernel               1                    1                    
+connected            4                    4                    
+local                4                    4                    
+ebgp                 4                    4                    
+ibgp                 0                    0                    
+------
+Totals               13                   13                   
+
+fim
