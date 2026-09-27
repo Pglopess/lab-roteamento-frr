@@ -1,0 +1,23 @@
+== 1 baseline (R1 -> 10.255.0.5)
+Known via "bgp", distance 200, metric 0, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.068/0.085/0.115 ms
+== 2 netem delay 100ms em r2:eth3
+Known via "bgp", distance 200, metric 0, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 100.276/100.697/101.213 ms
+== 3 mudanca de politica
+local-preference 200 para rotas vindas de 10.0.13.2 (R3) no R1
+tempo ate a rota mudar: 0.7 s (max 60)
+Known via "bgp", distance 20, metric 0, best
+* 10.0.13.2, via eth2, weight 1
+round-trip min/avg/max = 0.083/0.089/0.104 ms
+BGP routing table entry for 10.255.0.5/32, version 8
+Paths: (1 available, best #1, table default)
+  Advertised to non peer-group peers:
+  10.0.12.2 10.0.13.2
+  65002 65003
+    10.0.13.2 from 10.0.13.2 (10.255.0.3)
+      Origin IGP, localpref 200, valid, external, best (First path received)
+      Last update: Sun Sep 27 01:31:21 2026
+fim

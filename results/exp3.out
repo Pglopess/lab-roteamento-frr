@@ -1,0 +1,45 @@
+== 1 baseline (R1 -> 10.255.0.5)
+Known via "ospf", distance 110, metric 20, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.073/0.116/0.227 ms
+== 2 netem delay 100ms em r2:eth3
+Known via "ospf", distance 110, metric 20, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 100.152/100.836/101.737 ms
+== 3 mudanca de politica
+ip ospf cost 100 em r2:eth3 e r5:eth1
+tempo ate a rota mudar: 0.1 s (max 60)
+Known via "ospf", distance 110, metric 30, best
+* 10.0.12.2, via eth1, weight 1
+* 10.0.13.2, via eth2, weight 1
+round-trip min/avg/max = 0.081/0.105/0.135 ms
+fim
+== 1 baseline (R1 -> 10.255.0.5)
+Known via "rip", distance 120, metric 3, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.066/0.093/0.249 ms
+== 2 netem delay 100ms em r2:eth3
+Known via "rip", distance 120, metric 3, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 100.446/100.749/101.478 ms
+== 3 mudanca de politica
+RIP: metrica = saltos, sem parametro de custo por link; nada a alterar
+Known via "rip", distance 120, metric 3, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.072/0.083/0.100 ms
+fim
+== 1 baseline (R1 -> 10.255.0.5)
+Known via "bgp", distance 200, metric 0, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.068/0.085/0.115 ms
+== 2 netem delay 100ms em r2:eth3
+Known via "bgp", distance 200, metric 0, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 100.276/100.697/101.213 ms
+== 3 mudanca de politica
+local-preference 200 para rotas vindas de 10.0.13.2 (R3) no R1
+tempo ate a rota mudar: 0.7 s (max 60)
+Known via "bgp", distance 20, metric 0, best
+* 10.0.13.2, via eth2, weight 1
+round-trip min/avg/max = 0.083/0.089/0.104 ms
+fim

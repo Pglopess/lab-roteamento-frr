@@ -1,0 +1,14 @@
+== 1 baseline (R1 -> 10.255.0.5)
+Known via "rip", distance 120, metric 3, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.066/0.093/0.249 ms
+== 2 netem delay 100ms em r2:eth3
+Known via "rip", distance 120, metric 3, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 100.446/100.749/101.478 ms
+== 3 mudanca de politica
+RIP: metrica = saltos, sem parametro de custo por link; nada a alterar
+Known via "rip", distance 120, metric 3, best
+* 10.0.12.2, via eth1, weight 1
+round-trip min/avg/max = 0.072/0.083/0.100 ms
+fim
