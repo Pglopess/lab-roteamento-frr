@@ -1,0 +1,25 @@
+20:55:17 down ospf 1
+ospf down rep1 -> 0,0,yes
+20:57:16 down rip 1
+rip down rep1 -> 0,0,yes
+20:59:44 down bgp 1
+bgp down rep1 -> 0,0,yes
+21:01:46 down ospf 2
+ospf down rep2 -> 0,0,yes
+21:03:45 down rip 2
+rip down rep2 -> 0,0,yes
+21:06:14 down bgp 2
+bgp down rep2 -> 0,0,yes
+21:08:17 down ospf 3
+ospf down rep3 -> 0,0,yes
+21:10:16 down rip 3
+rip down rep3 -> 0,0,yes
+21:12:44 down bgp 3
+bgp down rep3 -> 0,0,yes
+21:14:47 silent ospf 1
+ospf silent rep1 -> 0,0,yes
+21:17:15 silent rip 1
+rip silent rep1 -> 0,0,yes
+21:23:03 silent bgp 1
+bgp silent rep1 -> 0,0,yes
+21:28:25 fim

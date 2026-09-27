@@ -31,7 +31,6 @@ rm -f /tmp/probe_$$.log /tmp/stop_$$
 PROBE=$!
 sleep 5
  
-T0=$(date +%s%3N)
 if [ "$MODE" = down ]; then
   docker exec $R2 ip link set eth3 down
 else
@@ -44,16 +43,10 @@ sleep $WIN
 touch /tmp/stop_$$; wait $PROBE
 cp /tmp/probe_$$.log $LOG; rm -f /tmp/stop_$$ /tmp/probe_$$.log
  
-RES=$(awk -v t0=$T0 '
-{ ts=int(substr($1,1,length($1)-6)) }
-ts<t0 { next }
-$2==0 { lost++; nf=1; next }
-$2==1 && nf && !rec { rec=ts }
-END {
-  if (!lost) print "0,0,yes";
-  else if (rec) printf "%d,%.1f,yes\n", lost, (rec-t0)/1000;
-  else printf "%d,NA,no\n", lost+0
-}' $LOG)
+RES=$(awk '{ts=substr($1,1,length($1)-6)+0}
+  $2==0 { if(!f) f=ts; l++; last=ts; next }
+  f && !rec && $2==1 { rec=ts }
+  END { if(!l) print "0,0,yes"; else printf "%d,%.1f,%s\n", l, (rec?(rec-f):(last-f))/1000, (rec?"yes":"no") }' $LOG)
  
 CSV=results/exp1.csv
 [ -f $CSV ] || echo "proto,mode,rep,lost_probes,interruption_s,recovered" > $CSV
