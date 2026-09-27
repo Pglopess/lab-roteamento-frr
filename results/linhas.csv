@@ -1,0 +1,4 @@
+proto,linhas_total,linhas_r1,linhas_r2
+ospf,112,20,26
+rip,86,16,19
+bgp,107,20,24

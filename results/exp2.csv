@@ -1,0 +1,4 @@
+proto,pacotes,bytes,pacotes_por_s,bytes_por_s
+ospf,108,8856,0.60,49.2
+rip,42,7632,0.23,42.4
+bgp,32,2454,0.18,13.6

@@ -43,7 +43,7 @@ sleep $WIN
 touch /tmp/stop_$$; wait $PROBE
 cp /tmp/probe_$$.log $LOG; rm -f /tmp/stop_$$ /tmp/probe_$$.log
  
-RES=$(awk '{ts=substr($1,1,length($1)-6)+0}
+RES=$(LC_ALL=C awk '{ts=substr($1,1,length($1)-6)+0}
   $2==0 { if(!f) f=ts; l++; last=ts; next }
   f && !rec && $2==1 { rec=ts }
   END { if(!l) print "0,0,yes"; else printf "%d,%.1f,%s\n", l, (rec?(rec-f):(last-f))/1000, (rec?"yes":"no") }' $LOG)
