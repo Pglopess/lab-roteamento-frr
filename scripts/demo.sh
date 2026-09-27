@@ -14,7 +14,7 @@ passo(){ echo; echo ">>> $*"; read -r -p "[ENTER] " _; }
  
 clear
 passo "1. Subindo a topologia (5 roteadores, FRR 10.2.1) com $PROTO"
-./scripts/up.sh $PROTO 2>&1 | tail -12
+./scripts/up.sh $PROTO >/dev/null 2>&1; docker ps --filter name=clab-rotas --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | sort
 echo "aguardando convergencia (${W}s)..."; sleep $W
  
 passo "2. Vizinhanca do R1 ($NEI)"
