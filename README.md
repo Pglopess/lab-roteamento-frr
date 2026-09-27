@@ -205,13 +205,25 @@ Captura com `tcpdump` no host, entrando no namespace do R2 (`nsenter`), nas inte
 | Protocolo | Pacotes | Bytes | Pacotes/s | Bytes/s |
 |---|---|---|---|---|
 | OSPF | 108 | 8856 | 0,60 | 49,2 |
-| RIP | 42 | 7632 | 0,23 | 42,4 |
-| BGP | 32 | 2454 | 0,18 | 13,6 |
+| RIP | 42 | 10772 | 0,23 | 59,8 |
+| BGP | 33 | 2520 | 0,18 | 14,0 |
 
 ![Pacotes por segundo](results/graficos/exp2_pacotes.png)
 ![Bytes por segundo](results/graficos/exp2_bytes.png)
 
-**Análise:** o OSPF tem mais pacotes (Hellos de 10 s em cada link). O RIP tem poucos pacotes, mas grandes, porque cada update carrega a tabela inteira. O BGP tem o menor volume em regime estável (keepalive de 60 s), e sua contagem inclui ACKs de TCP, que OSPF e RIP não têm.
+**Análise:** o OSPF tem mais pacotes (Hellos de 10 s em cada link). O RIP tem poucos pacotes, mas grandes, porque cada update carrega a tabela inteira; por isso passa a ter o maior volume em bytes. O BGP tem o menor volume em regime estável (keepalive de 60 s), e sua contagem inclui ACKs de TCP, que OSPF e RIP não têm.
+
+**Efeito das redes de acesso** (medição antes e depois de adicioná-las, mesma janela de 180 s):
+
+| Protocolo | Bytes antes | Bytes depois | Variação |
+|---|---|---|---|
+| OSPF | 8856 | 8856 | 0 |
+| RIP | 7632 | 10772 | +41% |
+| BGP | 2454 | 2520 | +3% |
+
+- **RIP:** o número de pacotes não mudou (42), mas cada update ficou maior. Cada rota ocupa 20 bytes no RIPv2, e os +3140 bytes equivalem a ~157 entradas a mais, cerca de 4 por pacote: exatamente os 4 prefixos de LAN remotos. O custo de controle do RIP cresce com o tamanho da rede, mesmo sem nenhuma mudança na topologia.
+- **OSPF:** igual, porque em regime estável só trafegam Hellos (que não dependem do número de prefixos) e as LANs são passivas. As novas LSAs só circulam na convergência inicial e no refresh de 30 min.
+- **BGP:** a diferença é ruído (1 pacote a mais, keepalive ou ACK dentro da janela). Em regime estável o BGP não reenvia prefixos.
 
 Limitação: mede regime estável, não a fase de convergência inicial; uma janela por protocolo, observada só no R2.
 
@@ -233,17 +245,17 @@ Limitação: os tempos de mudança medidos pelo script (OSPF 0,1 s, BGP 0,7 s) e
 ## Tamanho da tabela de roteamento
 `show ip route summary` em regime estável, contando as rotas aprendidas pelo protocolo na FIB. Dados brutos em `results/tabela.txt`.
 
-> **PREENCHER:** valores abaixo medidos antes das redes de acesso. Rodar `./scripts/tabela.sh` e `python3 scripts/graficos.py` e atualizar. Esperado: OSPF e RIP 12/11/12/11/12, BGP 8 em todos.
-
 | Protocolo | R1 | R2 | R3 | R4 | R5 |
 |---|---|---|---|---|---|
-| OSPF | 8 | 7 | 8 | 7 | 8 |
-| RIP | 8 | 7 | 8 | 7 | 8 |
-| BGP | 4 | 4 | 4 | 4 | 4 |
+| OSPF | 12 | 11 | 12 | 11 | 12 |
+| RIP | 12 | 11 | 12 | 11 | 12 |
+| BGP | 8 | 8 | 8 | 8 | 8 |
 
 ![Tabela](results/graficos/tabela.png)
 
-No OSPF, a coluna "Routes" do FRR mostra 11 em todos os roteadores, porque inclui prefixos que também aparecem como conectados; a comparação usa a coluna FIB (7 ou 8). O BGP tem a menor tabela porque só os loopbacks são anunciados nesta configuração, enquanto OSPF e RIP carregam também os 6 prefixos de link.
+Composição: cada roteador aprende os prefixos que não tem conectados. São 6 links `/30`, 5 loopbacks e 5 redes de acesso (16 prefixos). R1, R3 e R5 têm 2 links, o próprio loopback e a própria LAN conectados, e aprendem 12. R2 e R4 têm 3 links e aprendem 11.
+
+No OSPF, a coluna "Routes" do FRR mostra 16 em todos os roteadores, porque inclui os prefixos que também aparecem como conectados; a comparação usa a coluna FIB. O BGP tem a menor tabela (8 = 4 loopbacks + 4 redes de acesso remotas) porque não anuncia os 6 prefixos de link, que OSPF e RIP carregam.
 
 ## Complexidade de configuração
 Linhas úteis (sem vazias nem comentários `!`) dos `frr.conf` dos 5 roteadores (`scripts/linhas.sh`).
