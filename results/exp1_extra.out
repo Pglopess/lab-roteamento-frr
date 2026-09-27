@@ -1,0 +1,6 @@
+ospf silent rep2 -> 32,36.9,yes
+rip silent rep2 -> 163,191.8,yes
+bgp silent rep2 -> 107,125.3,yes
+ospf silent rep3 -> 33,37.9,yes
+rip silent rep3 -> 155,181.8,yes
+bgp silent rep3 -> 107,126.0,yes
