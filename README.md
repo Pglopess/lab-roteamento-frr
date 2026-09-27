@@ -76,12 +76,23 @@ Linhas grossas são sessões eBGP, tracejadas são sessões iBGP. Em OSPF e RIP,
 
 ```mermaid
 graph LR
-  R1((R1)) -.-|iBGP| R2((R2))
-  R3((R3)) -.-|iBGP| R4((R4))
-  R1 ===|eBGP| R3
-  R2 ===|eBGP| R4
-  R2 ===|eBGP| R5((R5))
-  R4 ===|eBGP| R5
+  subgraph AS65001
+    R1((R1))
+    R2((R2))
+  end
+  subgraph AS65002
+    R3((R3))
+    R4((R4))
+  end
+  subgraph AS65003
+    R5((R5))
+  end
+  R1 -. iBGP .- R2
+  R3 -. iBGP .- R4
+  R1 == eBGP ==> R3
+  R2 == eBGP ==> R4
+  R2 == eBGP ==> R5
+  R4 == eBGP ==> R5
 ```
 
 | Protocolo | Domínio | Detalhe |
