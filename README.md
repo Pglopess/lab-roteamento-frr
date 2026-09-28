@@ -4,7 +4,7 @@ Trabalho 1 de Redes de Computadores (UNISINOS). Trabalho individual.
 
 Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua rede de acesso e um host, construído com FRRouting em containers (containerlab). Três protocolos (BGP, OSPF, RIP) são configurados sobre a mesma topologia física, um por vez, e comparados em convergência, tráfego de controle, seleção de rotas, tamanho da tabela e complexidade de configuração.
 
-**Vídeo de demonstração:** PREENCHER (link do Release ou do arquivo no repositório)
+**Vídeo de demonstração:** (https://youtu.be/ye1q-3_3Nb0)
 
 ## Sumário
 1. [Ambiente e pré-requisitos](#ambiente-e-pré-requisitos)
