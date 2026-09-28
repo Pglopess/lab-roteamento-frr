@@ -9,6 +9,14 @@ case $PROTO in
   bgp)  NEI="show bgp summary";      ROT="show ip route bgp";  W=50;;
   *) echo invalido; exit 1;;
 esac
+# Estrutura interna de cada protocolo (o "principio de funcionamento" na tela):
+#  ospf: LSDB (um LSA por roteador, igual em todos)   rip: tabela com metrica = saltos
+#  bgp : caminhos recebidos para 192.168.5.0/24 com AS-path e o motivo da escolha
+case $PROTO in
+  ospf) EXT="show ip ospf database";                 FIL=".";;
+  rip)  EXT="show ip rip";                           FIL="Network|10.0.25.0|10.255.0.5|192.168.5.0";;
+  bgp)  EXT="show bgp ipv4 unicast 192.168.5.0/24";  FIL=".";;
+esac
 V(){ docker exec clab-rotas-r$1 vtysh -c "$2" 2>/dev/null; }
 passo(){ echo; echo ">>> $*"; read -r -p "[ENTER] " _; }
  
@@ -26,6 +34,9 @@ passo "3. Matriz de ping entre loopbacks e entre hosts das redes de acesso"
 passo "4. Rotas aprendidas no R1 ($ROT)"
 V 1 "$ROT"
  
+passo "4b. Como o $PROTO decide ($EXT)"
+V 1 "$EXT"
+
 passo "5. Rota do R1 para a rede de acesso do R5 (192.168.5.0/24) e caminho h1 -> h5"
 V 1 "show ip route 192.168.5.0/24" | grep -E "Known|via"
 docker exec clab-rotas-h1 traceroute -n -w1 -q1 192.168.5.10
@@ -43,5 +54,8 @@ passo "7. Nova rota do R1 para 192.168.5.0/24 e novo caminho h1 -> h5"
 V 1 "show ip route 192.168.5.0/24" | grep -E "Known|via"
 docker exec clab-rotas-h1 traceroute -n -w1 -q1 192.168.5.10
  
+passo "7b. O que mudou dentro do $PROTO ($EXT)"
+V 1 "$EXT" | grep -E "$FIL"
+
 passo "8. Derrubando o laboratorio"
 ./scripts/down.sh 2>&1 | tail -3
