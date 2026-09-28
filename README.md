@@ -14,7 +14,6 @@ Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua
 7. [Tamanho da tabela de roteamento](#tamanho-da-tabela-de-roteamento)
 8. [Complexidade de configuração](#complexidade-de-configuração)
 9. [Comparação, escalabilidade e adequação a cenários](#comparação-escalabilidade-e-adequação-a-cenários)
-10. [Limitações](#limitações)
 
 ## Ambiente e pré-requisitos
 - VirtualBox (Windows) com Ubuntu, kernel 7.0.0-29-generic, ~3,3 GiB de RAM
