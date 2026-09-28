@@ -8,14 +8,13 @@ Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua
 1. [Ambiente e pré-requisitos](#ambiente-e-pré-requisitos)
 2. [Topologia](#topologia)
 3. [Como reproduzir](#como-reproduzir)
-4. [Premissas de interpretação do enunciado](#premissas-de-interpretação-do-enunciado)
-5. [Experimento 1: convergência](#experimento-1-convergência)
-6. [Experimento 2: tráfego de controle](#experimento-2-tráfego-de-controle)
-7. [Experimento 3: seleção de rotas](#experimento-3-seleção-de-rotas)
-8. [Tamanho da tabela de roteamento](#tamanho-da-tabela-de-roteamento)
-9. [Complexidade de configuração](#complexidade-de-configuração)
-10. [Comparação, escalabilidade e adequação a cenários](#comparação-escalabilidade-e-adequação-a-cenários)
-11. [Limitações](#limitações)
+4. [Experimento 1: convergência](#experimento-1-convergência)
+5. [Experimento 2: tráfego de controle](#experimento-2-tráfego-de-controle)
+6. [Experimento 3: seleção de rotas](#experimento-3-seleção-de-rotas)
+7. [Tamanho da tabela de roteamento](#tamanho-da-tabela-de-roteamento)
+8. [Complexidade de configuração](#complexidade-de-configuração)
+9. [Comparação, escalabilidade e adequação a cenários](#comparação-escalabilidade-e-adequação-a-cenários)
+10. [Limitações](#limitações)
 
 ## Ambiente e pré-requisitos
 - VirtualBox (Windows) com Ubuntu, kernel 7.0.0-29-generic, ~3,3 GiB de RAM
