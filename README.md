@@ -3,7 +3,9 @@
 Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua rede de acesso e um host, construído com FRRouting em containers (containerlab). Três protocolos (BGP, OSPF, RIP) são configurados sobre a mesma topologia física, um por vez, e comparados em convergência, tráfego de controle, seleção de rotas, tamanho da tabela e complexidade de configuração.
 
 **Vídeo de demonstração:** [assistir no YouTube](https://youtu.be/ye1q-3_3Nb0) - Com mais pausas entre as saídas
-**Vídeo de demonstração:** [assistir no YouTube](https://www.youtube.com/watch?v=QkNeVjWOmkM) - Mais curto para apresentação
+
+
+**Vídeo de demonstração (Com cortes):** [assistir no YouTube](https://www.youtube.com/watch?v=QkNeVjWOmkM) - Mais curto para apresentação
 
 
 ## Sumário
