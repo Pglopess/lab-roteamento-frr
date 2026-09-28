@@ -24,7 +24,7 @@ Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua
 - Docker 29.1.3, containerlab 0.79.0, tcpdump 4.99.6 (no host), python3
 - Imagem FRR: `quay.io/frrouting/frr:10.2.1`, digest `sha256:e47e67bd612030cb1bedee2bde85b73913f2ea021573b749deb21d94940f03c1`
 - Usuário nos grupos `docker` e `clab_admins`; `sudo` só no `exp2.sh` (tcpdump via `nsenter`)
-- Para gerar os gráficos: `matplotlib` (foi executado no Windows)
+- Para gerar os gráficos: `matplotlib` (`sudo apt install python3-matplotlib`)
 
 ```
 docker pull quay.io/frrouting/frr:10.2.1
@@ -187,7 +187,6 @@ Dois métodos de falha:
 - **`link down`** (`ip link set eth3 down`): a interface cai nas duas pontas e os protocolos reagem ao carrier. Mede o melhor caso.
 - **Falha silenciosa** (`tc netem loss 100%` nos dois lados do link): o link continua "up" e só os timers do protocolo detectam a falha.
 
-
 | Protocolo | `link down` (3 rep.) | falha silenciosa (3 rep.) |
 |---|---|---|
 | OSPF | sem perdas | 37,2 s (36,9 a 37,9) |
@@ -200,8 +199,7 @@ Dois métodos de falha:
 **Análise** (rascunho: reescrever com suas palavras)
 - Na falha silenciosa, só os timers detectam a falha. O OSPF ficou próximo do dead interval (40 s); o RIP, próximo do timeout de 180 s mais o próximo update.
 - O BGP (~125 s) ficou abaixo do hold de 180 s porque o hold conta desde o último keepalive recebido. A baixa variação entre repetições reflete a fase do ciclo de keepalive no instante da injeção, que foi sempre o mesmo. Em outro instante, o valor cairia entre ~120 e 180 s.
-
-No link down, OSPF e BGP reagem ao carrier imediatamente e não perdem pacotes. O RIP perdeu de 1,4 a 13,3 s: o R2 anuncia a rota como inalcançável (métrica 16), mas o R1 não guarda caminho alternativo e precisa esperar o próximo update periódico do R3 (30 s, jitter de ±50%) para aprender o desvio.
+- No `link down`, OSPF e BGP reagem ao carrier imediatamente e não perdem pacotes. O RIP perdeu de 1,4 a 13,3 s: o R2 anuncia a rota como inalcançável (métrica 16), mas o R1 não guarda caminho alternativo e precisa esperar o próximo update periódico do R3 (30 s, jitter de ±50%) para aprender o desvio.
 - Após a queda, o R1 chega ao R5 por dois caminhos de 3 saltos em OSPF (ECMP da corda) e por um só em RIP.
 
 ## Experimento 2: tráfego de controle
@@ -273,7 +271,7 @@ Linhas úteis (sem vazias nem comentários `!`) dos `frr.conf` dos 5 roteadores 
 
 ![Linhas](results/graficos/linhas.png)
 
-O OSPF ficou maior por escolha de configuração (`area`, `network point-to-point` e `cost` em cada interface); o RIP anuncia tudo com duas linhas `network`. A contagem de linhas não mede a dificuldade de acertar a configuração: o BGP foi o que mais exigiu conhecimento (`no bgp ebgp-requires-policy`, `next-hop-self`, tipo de vizinho).
+O OSPF ficou maior por escolha de configuração (`area`, `network point-to-point` e `cost` em cada interface); o RIP anuncia tudo com três linhas `network` e uma `passive-interface`. A contagem de linhas não mede a dificuldade de acertar a configuração: o BGP foi o que mais exigiu conhecimento (`no bgp ebgp-requires-policy`, `next-hop-self`, tipo de vizinho).
 
 ## Comparação, escalabilidade e adequação a cenários
 Rascunho: reescrever e conferir com a matéria da disciplina.
@@ -299,3 +297,4 @@ Rascunho: reescrever e conferir com a matéria da disciplina.
 - Ambiente virtualizado (VirtualBox + containers): os tempos absolutos não representam hardware real.
 - Timers padrão do FRR; não foi avaliado o efeito de timers reduzidos.
 - Só um ponto de falha (R2-R5) e um ponto de observação (R2) foram usados.
+- No RIP, `redistribute connected` também anuncia a rede de gerência do containerlab (`172.20.20.0/24`, aparece como `C(r)` em `show ip rip`). Não altera o roteamento, porque todos os roteadores a têm conectada, mas acrescenta uma entrada (~20 B) a cada update medido no experimento 2. A linha é redundante: os comandos `network` já cobrem todas as interfaces.
