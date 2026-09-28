@@ -1,7 +1,5 @@
 # Roteamento IP com FRRouting: BGP, OSPF e RIP
 
-Trabalho 1 de Redes de Computadores (UNISINOS). Trabalho individual.
-
 Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua rede de acesso e um host, construído com FRRouting em containers (containerlab). Três protocolos (BGP, OSPF, RIP) são configurados sobre a mesma topologia física, um por vez, e comparados em convergência, tráfego de controle, seleção de rotas, tamanho da tabela e complexidade de configuração.
 
 **Vídeo de demonstração:** [assistir no YouTube](https://youtu.be/ye1q-3_3Nb0)
@@ -167,19 +165,6 @@ results/                                CSVs, logs brutos (raw/) e gráficos (gr
 ```
 O `up.sh` copia `configs/<proto>` para `running/` e sobe o laboratório. Só uma pasta de configuração é usada por vez.
 
-## Premissas de interpretação do enunciado
-- **Configuração não simultânea:** cada protocolo roda sozinho. O laboratório é destruído e recriado entre eles.
-- **Domínio de OSPF e RIP:** os 5 roteadores formam um único domínio, com experimentos separados.
-- **BGP:** eBGP entre ASes e iBGP dentro deles, pelo link direto com `next-hop-self`, sem IGP.
-- **`no bgp ebgp-requires-policy`:** sem isso, o FRR estabelece a sessão eBGP mas não troca prefixos.
-- **Sem políticas de roteamento:** o AS65002 atua como trânsito entre AS65001 e AS65003, o que cria o caminho alternativo AS1-AS3.
-- **Timers padrão do FRR:** OSPF hello 10 s / dead 40 s; RIP update 30 s / timeout 180 s; BGP keepalive 60 s / hold 180 s.
-- **Custos:** OSPF fixado em 10 por link; RIP usa contagem de saltos.
-- **Falhas no BGP** só em links entre ASes (R2-R5): sem IGP, a queda de um link iBGP particiona o AS.
-- **BGP anuncia loopbacks e redes de acesso:** não anuncia as redes dos links `/30`, que só servem ao transporte entre roteadores. Isso reduz a tabela do BGP em relação a OSPF e RIP e é consequência desta configuração.
-- **Redes de acesso passivas:** em OSPF e RIP as LANs dos hosts são anunciadas, mas não formam vizinhança.
-- **Multipath:** nos empates da corda, o OSPF instalou os dois caminhos e o RIP do FRR instalou um só.
-
 ## Experimento 1: convergência
 Queda do link R2-R5 com ping contínuo de R1 para o loopback de R5 (`10.255.0.5`). Dados em `results/exp1.csv`, logs brutos em `results/raw/`. A sonda amostra ~5 vezes por segundo, e cada ping perdido leva até 1 s: o erro é de ~1 s.
 
@@ -291,11 +276,3 @@ O OSPF ficou maior por escolha de configuração (`area`, `network point-to-poin
 - **OSPF (estado de enlace):** cada roteador mantém o mapa completo da área (LSDB) e calcula os caminhos com Dijkstra. Isso explica a convergência mais rápida e o ECMP automático nos empates. O custo é mais tráfego de Hellos em regime estável e uma LSDB que cresce com a rede, o que em redes grandes exige divisão em áreas. É a escolha adequada para o roteamento interno de um AS.
 - **BGP (vetor de caminhos):** escolhe rotas por uma sequência de atributos, e não pela menor métrica. No experimento 3, o AS-path mais curto venceu o critério eBGP > iBGP, e o `local-preference` mudou a rota para um caminho mais longo. Teve o menor tráfego de controle em regime estável (keepalives esparsos, sem reenviar prefixos) e a menor tabela, mas convergência lenta em falha silenciosa por causa do hold time de 180 s. É o único dos três adequado à interconexão entre ASes, onde a política importa mais que o menor caminho. Em ASes maiores, o iBGP exige malha completa ou route reflectors.
 - **Síntese:** os três resolvem problemas diferentes. OSPF e RIP garantem alcançabilidade dentro de um domínio, e o BGP aplica política entre domínios. Numa rede real eles se combinam, com um IGP dentro de cada AS e o BGP entre eles. A comparação deste trabalho é de comportamento sob as mesmas condições, e não de qual é "melhor".
-
-## Limitações
-- Uma repetição por medição nos experimentos 2 e 3; três repetições no experimento 1.
-- Erro de ~1 s na sonda do experimento 1.
-- Ambiente virtualizado (VirtualBox + containers): os tempos absolutos não representam hardware real.
-- Timers padrão do FRR; não foi avaliado o efeito de timers reduzidos.
-- Só um ponto de falha (R2-R5) e um ponto de observação (R2) foram usados.
-- No RIP, `redistribute connected` também anuncia a rede de gerência do containerlab (`172.20.20.0/24`, aparece como `C(r)` em `show ip rip`). Não altera o roteamento, porque todos os roteadores a têm conectada, mas acrescenta uma entrada (~20 B) a cada update medido no experimento 2. A linha é redundante: os comandos `network` já cobrem todas as interfaces.
