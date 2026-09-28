@@ -25,6 +25,7 @@ for i, p in enumerate(["ospf", "bgp", "rip"]):
     ax.text(i, max(v) + 6, f"{m:.1f} s", ha="center")
 ax.set_xticks(range(3)); ax.set_xticklabels(["OSPF", "BGP", "RIP"])
 ax.set_ylabel("Interrupção do ping R1→R5 (s)")
+ax.set_ylim(0, 215)
 ax.set_title("Convergência: falha silenciosa (netem 100%), 3 rep.")
 salvar("exp1_silent")
 
@@ -89,12 +90,16 @@ rtt = {"OSPF": (0.12, 100.8), "RIP": (0.09, 100.7), "BGP": (0.09, 100.7)}
 fig, ax = plt.subplots(figsize=(6, 4))
 for i, (p, (a, b)) in enumerate(rtt.items()):
     ax.bar(i - 0.15, a, 0.3, color="#888", label="baseline" if i == 0 else None)
-    ax.bar(i + 0.15, b, 0.3, color=COR[p], label="+100 ms em R2-R5" if i == 0 else None)
+    ax.bar(i + 0.15, b, 0.3, color=COR[p])
     ax.text(i - 0.15, a, f"{a:.2f}", ha="center", va="bottom")
     ax.text(i + 0.15, b, f"{b:.0f}", ha="center", va="bottom")
 ax.set_yscale("log")
 ax.set_xticks(range(3)); ax.set_xticklabels(list(rtt)); ax.set_ylabel("RTT médio (ms, escala log)")
-ax.set_ylim(0.03, 400); ax.legend(loc="center right")
+from matplotlib.patches import Patch
+ax.set_ylim(0.03, 3000)
+ax.legend(handles=[Patch(color="#888", label="baseline"),
+                   Patch(facecolor="white", edgecolor="#333", label="+100 ms em R2-R5 (cor do protocolo)")],
+          loc="upper left", fontsize=9)
 ax.set_title("Nenhum protocolo evita o caminho lento")
 salvar("exp3_rtt")
 print("PNGs em results/graficos/")
