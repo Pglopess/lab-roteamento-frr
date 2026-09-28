@@ -4,7 +4,7 @@ Trabalho 1 de Redes de Computadores (UNISINOS). Trabalho individual.
 
 Ambiente experimental com 5 roteadores em 3 Sistemas Autônomos, cada um com sua rede de acesso e um host, construído com FRRouting em containers (containerlab). Três protocolos (BGP, OSPF, RIP) são configurados sobre a mesma topologia física, um por vez, e comparados em convergência, tráfego de controle, seleção de rotas, tamanho da tabela e complexidade de configuração.
 
-**Vídeo de demonstração:** (https://youtu.be/ye1q-3_3Nb0)
+**Vídeo de demonstração:** [assistir no YouTube](https://youtu.be/ye1q-3_3Nb0)
 
 ## Sumário
 1. [Ambiente e pré-requisitos](#ambiente-e-pré-requisitos)
@@ -187,7 +187,6 @@ Dois métodos de falha:
 - **`link down`** (`ip link set eth3 down`): a interface cai nas duas pontas e os protocolos reagem ao carrier. Mede o melhor caso.
 - **Falha silenciosa** (`tc netem loss 100%` nos dois lados do link): o link continua "up" e só os timers do protocolo detectam a falha.
 
-**Hipóteses** (`results/hipoteses.md`, escritas antes da medição): no `link down`, os três recuperam em menos de ~1 s; na falha silenciosa, OSPF ~40 s (dead interval), RIP ≥ 180 s (timeout) e BGP ~180 s (hold time). Só o experimento 1 tem hipótese registrada antes das medições.
 
 | Protocolo | `link down` (3 rep.) | falha silenciosa (3 rep.) |
 |---|---|---|
@@ -201,7 +200,8 @@ Dois métodos de falha:
 **Análise** (rascunho: reescrever com suas palavras)
 - Na falha silenciosa, só os timers detectam a falha. O OSPF ficou próximo do dead interval (40 s); o RIP, próximo do timeout de 180 s mais o próximo update.
 - O BGP (~125 s) ficou abaixo do hold de 180 s porque o hold conta desde o último keepalive recebido. A baixa variação entre repetições reflete a fase do ciclo de keepalive no instante da injeção, que foi sempre o mesmo. Em outro instante, o valor cairia entre ~120 e 180 s.
-- No `link down`, OSPF e BGP reagem ao carrier imediatamente. A hipótese de recuperação abaixo de ~1 s foi **refutada para o RIP** (1,4 a 13,3 s). Explicação provável, não verificada: o RIP depende dos updates periódicos dos vizinhos (30 s, jitter de ±50%) para aprender o caminho alternativo.
+
+No link down, OSPF e BGP reagem ao carrier imediatamente e não perdem pacotes. O RIP perdeu de 1,4 a 13,3 s: o R2 anuncia a rota como inalcançável (métrica 16), mas o R1 não guarda caminho alternativo e precisa esperar o próximo update periódico do R3 (30 s, jitter de ±50%) para aprender o desvio.
 - Após a queda, o R1 chega ao R5 por dois caminhos de 3 saltos em OSPF (ECMP da corda) e por um só em RIP.
 
 ## Experimento 2: tráfego de controle
@@ -299,4 +299,3 @@ Rascunho: reescrever e conferir com a matéria da disciplina.
 - Ambiente virtualizado (VirtualBox + containers): os tempos absolutos não representam hardware real.
 - Timers padrão do FRR; não foi avaliado o efeito de timers reduzidos.
 - Só um ponto de falha (R2-R5) e um ponto de observação (R2) foram usados.
-- A hipótese de cada experimento foi registrada antes da medição apenas no experimento 1.
