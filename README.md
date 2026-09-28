@@ -196,11 +196,14 @@ Dois métodos de falha:
 ![Falha silenciosa](results/graficos/exp1_silent.png)
 ![Link down](results/graficos/exp1_down.png)
 
-**Análise** (rascunho: reescrever com suas palavras)
-- Na falha silenciosa, só os timers detectam a falha. O OSPF ficou próximo do dead interval (40 s); o RIP, próximo do timeout de 180 s mais o próximo update.
-- O BGP (~125 s) ficou abaixo do hold de 180 s porque o hold conta desde o último keepalive recebido. A baixa variação entre repetições reflete a fase do ciclo de keepalive no instante da injeção, que foi sempre o mesmo. Em outro instante, o valor cairia entre ~120 e 180 s.
-- No `link down`, OSPF e BGP reagem ao carrier imediatamente e não perdem pacotes. O RIP perdeu de 1,4 a 13,3 s: o R2 anuncia a rota como inalcançável (métrica 16), mas o R1 não guarda caminho alternativo e precisa esperar o próximo update periódico do R3 (30 s, jitter de ±50%) para aprender o desvio.
-- Após a queda, o R1 chega ao R5 por dois caminhos de 3 saltos em OSPF (ECMP da corda) e por um só em RIP.
+**Análise**
+- **Falha silenciosa:** como a interface continua "up", só os timers de cada protocolo percebem a falha, e o tempo de interrupção acompanha esses timers.
+  - **OSPF:** ficou em ~37 s, perto do dead interval de 40 s. O dead interval conta a partir do último Hello recebido, que chegou cerca de 3 s antes da falha, por isso o valor fica um pouco abaixo de 40 s.
+  - **RIP:** ficou em ~185 s. Isso é o timeout de 180 s da rota mais o tempo até o próximo update do vizinho com o caminho alternativo, o que explica a maior variação (181 a 192 s).
+  - **BGP:** ficou em ~126 s, abaixo do hold time de 180 s. O hold é contado a partir do último keepalive recebido (enviado a cada 60 s), e não do momento da falha. A variação quase nula entre as repetições indica que a falha caiu sempre na mesma fase do ciclo de keepalive. Em outro instante, o valor ficaria entre ~120 e 180 s.
+- **`link down`:** OSPF e BGP reagem à queda da interface imediatamente e não perderam nenhum pacote. O OSPF gera um novo LSA e recalcula as rotas; o BGP derruba a sessão e passa a usar o caminho que já tinha recebido do outro vizinho. O RIP perdeu de 1,4 a 13,3 s: o R2 anuncia a rota como inalcançável (métrica 16), mas o R1 guarda só a melhor rota e precisa esperar o próximo update periódico do R3 (30 s, jitter de ±50%) para aprender o desvio.
+- **Multipath:** após a queda, o R1 chega ao R5 por dois caminhos de mesmo custo em OSPF (ECMP da corda) e por um só em RIP.
+- **Conclusão:** detectar a falha rapidamente depende do sinal da interface ou de timers curtos. Numa falha silenciosa, o OSPF foi 3,4 vezes mais rápido que o BGP e 5 vezes mais rápido que o RIP, com os timers padrão.
 
 ## Experimento 2: tráfego de controle
 Captura com `tcpdump` no host, entrando no namespace do R2 (`nsenter`), nas interfaces `eth1`, `eth2` e `eth3` (a `eth0` de gerência fica fora), por 180 s em regime estável. Filtros: `ip proto 89` (OSPF), `udp port 520` (RIP), `tcp port 179` (BGP). Dados em `results/exp2.csv`.
@@ -274,8 +277,6 @@ Linhas úteis (sem vazias nem comentários `!`) dos `frr.conf` dos 5 roteadores 
 O OSPF ficou maior por escolha de configuração (`area`, `network point-to-point` e `cost` em cada interface); o RIP anuncia tudo com três linhas `network` e uma `passive-interface`. A contagem de linhas não mede a dificuldade de acertar a configuração: o BGP foi o que mais exigiu conhecimento (`no bgp ebgp-requires-policy`, `next-hop-self`, tipo de vizinho).
 
 ## Comparação, escalabilidade e adequação a cenários
-Rascunho: reescrever e conferir com a matéria da disciplina.
-
 | | RIP | OSPF | BGP |
 |---|---|---|---|
 | Princípio | vetor de distância | estado de enlace | vetor de caminhos |
@@ -286,10 +287,10 @@ Rascunho: reescrever e conferir com a matéria da disciplina.
 | Escala | limite de 15 saltos; envia a tabela inteira a cada update | cada roteador guarda o mapa completo (LSDB); áreas permitem escalar | projetado para escala da Internet e para aplicar política entre ASes |
 | Cenário adequado | redes pequenas e simples | rede interna de um AS, com convergência rápida | interconexão entre ASes |
 
-- **RIP:** simples, mas com convergência lenta e limite de 15 saltos. Adequado a redes pequenas.
-- **OSPF:** convergência rápida e escolha por custo configurável. O custo é a replicação da LSDB, que exige áreas em redes grandes.
-- **BGP:** não busca o melhor caminho técnico, e sim o preferido por política. É a única opção entre ASes, e sua escalabilidade vem da agregação e do controle por atributos. Em um AS com mais roteadores, o iBGP exige malha completa ou route reflectors.
-- Os três têm objetivos diferentes (BGP: política entre ASes; OSPF e RIP: alcançabilidade interna). A comparação deste trabalho é de comportamento sob as mesmas falhas, não de qual é "melhor".
+- **RIP (vetor de distância):** cada roteador só conhece o que os vizinhos anunciam, sem visão da topologia. É o mais simples de configurar, mas foi o mais lento em todas as falhas medidas e o único cujo tráfego de controle cresceu com a rede: +41% em bytes com apenas 4 prefixos a mais, porque cada update carrega a tabela inteira. Somado ao limite de 15 saltos, isso o restringe a redes pequenas e estáveis.
+- **OSPF (estado de enlace):** cada roteador mantém o mapa completo da área (LSDB) e calcula os caminhos com Dijkstra. Isso explica a convergência mais rápida e o ECMP automático nos empates. O custo é mais tráfego de Hellos em regime estável e uma LSDB que cresce com a rede, o que em redes grandes exige divisão em áreas. É a escolha adequada para o roteamento interno de um AS.
+- **BGP (vetor de caminhos):** escolhe rotas por uma sequência de atributos, e não pela menor métrica. No experimento 3, o AS-path mais curto venceu o critério eBGP > iBGP, e o `local-preference` mudou a rota para um caminho mais longo. Teve o menor tráfego de controle em regime estável (keepalives esparsos, sem reenviar prefixos) e a menor tabela, mas convergência lenta em falha silenciosa por causa do hold time de 180 s. É o único dos três adequado à interconexão entre ASes, onde a política importa mais que o menor caminho. Em ASes maiores, o iBGP exige malha completa ou route reflectors.
+- **Síntese:** os três resolvem problemas diferentes. OSPF e RIP garantem alcançabilidade dentro de um domínio, e o BGP aplica política entre domínios. Numa rede real eles se combinam, com um IGP dentro de cada AS e o BGP entre eles. A comparação deste trabalho é de comportamento sob as mesmas condições, e não de qual é "melhor".
 
 ## Limitações
 - Uma repetição por medição nos experimentos 2 e 3; três repetições no experimento 1.
